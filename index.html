@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>AR Kubus Pintar</title>
+<style>
+*{box-sizing:border-box;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#050816;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
+body.ar{background:transparent}body.ar,html:has(body.ar){background:#000}
+.scr{position:fixed;inset:0;display:none;overflow:auto;padding:max(18px,env(safe-area-inset-top)) 18px 24px;z-index:5}
+.scr.on{display:block}
+#menu{background:radial-gradient(circle at 20% 0,#1b3a8a 0,transparent 45%),radial-gradient(circle at 90% 90%,#5b21b6 0,transparent 45%),#050816}
+.logo{width:72px;height:72px;border-radius:22px;background:linear-gradient(135deg,#22d3ee,#6366f1);display:grid;place-items:center;font-weight:900;font-size:28px;box-shadow:0 0 40px #22d3ee66;margin:24px auto 14px}
+h1{margin:0;text-align:center;font-size:28px}.sub{text-align:center;color:#9fb0d9;margin:6px 0 22px;font-size:14px}
+.card{background:#ffffff12;border:1px solid #ffffff22;border-radius:18px;padding:14px 16px;margin-bottom:12px;backdrop-filter:blur(8px)}
+.card b{color:#a5f3fc}.card ol{margin:6px 0 0;padding-left:20px;color:#c7d2fe;font-size:14px;line-height:1.6}
+.btn{display:block;width:100%;border:0;border-radius:16px;padding:15px;font-size:16px;font-weight:700;color:#fff;margin-bottom:10px;background:#ffffff1c;cursor:pointer}
+.btn.p{background:linear-gradient(90deg,#06b6d4,#6366f1);box-shadow:0 8px 26px #6366f188}
+.btn.y{background:#facc15;color:#1f1700}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between}
+#arjs-video{z-index:0!important}#stage{position:fixed;inset:0;z-index:1}a-scene{position:absolute!important}
+#hud{position:fixed;inset:0;z-index:10;display:none;pointer-events:none}#hud.on{display:block}
+#hud>.top,#hud>.bot{pointer-events:auto}.frame{pointer-events:none!important}
+.top{position:absolute;top:max(10px,env(safe-area-inset-top));left:10px;right:10px;display:flex;gap:8px;align-items:center;justify-content:space-between}
+.chip{background:#000a;border:1px solid #fff3;border-radius:99px;padding:8px 14px;font-size:13px;font-weight:600;backdrop-filter:blur(6px)}
+.chip.ok{background:#16a34acc}.chip.sc{background:#a3e635;color:#10200a;font-weight:800}
+.bot{position:absolute;left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));max-height:34vh;overflow:auto;background:#050816d9;border:1px solid #fff3;border-radius:20px;padding:14px;text-align:center;backdrop-filter:blur(8px)}
+.bot h3{margin:0 0 4px;font-size:16px}.bot p{margin:0 0 10px;font-size:13px;color:#cbd5e1;line-height:1.5}
+.bot .btn{display:inline-block;width:auto;min-height:44px;padding:10px 16px;font-size:14px;margin:0 4px 4px}.chip{min-height:38px}
+.frame{position:absolute;inset:22% 12% 30%;border:3px solid #fff8;border-radius:24px;pointer-events:none;box-shadow:0 0 0 100vmax #0003}
+.toast{max-width:88vw;text-align:center;position:fixed;left:50%;top:70px;transform:translateX(-50%);background:#16a34a;padding:12px 20px;border-radius:14px;font-weight:700;z-index:30;display:none}
+#print{background:#fff;color:#000}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+figure{margin:0;text-align:center;font-size:13px}figure canvas{width:100%;max-width:300px;border:1px dashed #999}
+.file{width:100%;color:#c7d2fe;margin:8px 0 4px}.st{font-size:12px;color:#86efac}
+@media print{html,body{overflow:visible;height:auto}.scr{position:static}.no{display:none!important}figure{break-inside:avoid}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js@3.4.5/aframe/build/aframe-ar.js"></script>
+</head><body>
+
+<div id="menu" class="scr on">
+  <div class="logo">AR</div>
+  <h1>AR Kubus Pintar</h1>
+  <div class="sub">Arahkan kamera ke sisi kubus, objek 3D &amp; video langsung muncul</div>
+  <div class="card"><b>Misi aktif:</b> Kenali 4 objek angkasa (Matahari, Jupiter, Bumi, Mars). Sisi 5 &amp; 6 untuk video/gambar buatan Anda.</div>
+  <button class="btn p" onclick="start()">📷 Mulai Scan AR</button>
+  <button class="btn" onclick="openPrint()">🧊 Cetak Marker Kubus</button>
+  <button class="btn" onclick="show('setup')">🎬 Atur Video / Gambar</button>
+  <div class="card"><b>Cara pakai</b><ol>
+    <li>Cetak 6 marker, tempel di 6 sisi kubus kertas.</li>
+    <li>Tekan <i>Mulai Scan AR</i>, izinkan kamera.</li>
+    <li>Arahkan ke satu sisi kubus, putar kubus untuk sisi lain.</li></ol>Jika kamera tidak mau terbuka, buka link di <b>Chrome</b> (Android) atau <b>Safari</b> (iPhone), bukan di browser dalam WhatsApp/Instagram.</div>
+</div>
+
+<div id="setup" class="scr" style="background:#050816">
+  <h1 style="text-align:left">Atur Media</h1>
+  <div class="sub" style="text-align:left">Pilih video atau gambar untuk sisi 5 &amp; 6 (disimpan sementara di perangkat).</div>
+  <div class="card"><b>Sisi 5 – Video 1</b><input class="file" type="file" accept="video/*,image/*" onchange="setMedia(0,this.files[0])"><div class="st" id="st0">Belum ada media</div></div>
+  <div class="card"><b>Sisi 6 – Video 2</b><input class="file" type="file" accept="video/*,image/*" onchange="setMedia(1,this.files[0])"><div class="st" id="st1">Belum ada media</div></div>
+  <button class="btn p" onclick="show('menu')">← Kembali</button>
+</div>
+
+<div id="print" class="scr">
+  <div class="no row" style="margin-bottom:12px"><button class="btn" style="background:#ddd;color:#000;margin:0" onclick="show('menu')">← Kembali</button><button class="btn p" style="margin:0" onclick="print()">🖨️ Cetak</button></div>
+  <h2 style="margin:6px 0">Marker Kubus</h2><p style="font-size:13px;margin-top:0">Cetak jelas (hitam-putih), gunting, lalu tempel rata pada 6 sisi kubus. Jangan dibalik/diputar saat menempel.</p>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div id="stage"></div>
+<div id="hud">
+  <div class="top"><button class="chip" style="color:#fff" onclick="stop()">✕ Keluar</button><div class="chip" id="stat">Mencari target…</div><div class="chip sc" id="score">Skor: 0/4</div></div>
+  <div class="frame" id="frame"></div>
+  <div class="bot"><h3 id="ct">Halakan pada satu muka kubus</h3><p id="cp">Pastikan marker rata, terang dan memenuhi bingkai.</p><div id="ca"></div></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const P=['0010000111111100','0010110011100111','1110001110001001','0100010101110011','1010101110010010','1001010011011000'];
+const OBJ=[
+ {n:'Matahari',e:'☀️',f:'Matahari adalah bintang di pusat Tata Surya. Ia memberi cahaya dan panas bagi semua planet.'},
+ {n:'Jupiter',e:'🪐',f:'Jupiter adalah planet terbesar di Tata Surya dan punya badai raksasa bernama Bintik Merah Besar.'},
+ {n:'Bumi',e:'🌍',f:'Bumi adalah satu-satunya planet yang diketahui memiliki kehidupan dan air cair yang melimpah.'},
+ {n:'Mars',e:'🔴',f:'Mars dijuluki Planet Merah karena tanahnya kaya besi oksida. Di sana ada gunung api tertinggi, Olympus Mons.'}];
+const MED=[null,null],found=new Set(),$=id=>document.getElementById(id);
+function show(id){document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id))}
+
+/* ---------- marker ---------- */
+function inner(i){const c=document.createElement('canvas');c.width=c.height=200;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,200,200);x.fillStyle='#000';
+ [...P[i]].forEach((b,k)=>{if(b==='1')x.fillRect((k%4)*50,((k/4)|0)*50,50,50)});return c}
+function markerImg(i){const c=document.createElement('canvas');c.width=c.height=440;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,440,440);x.fillStyle='#000';x.fillRect(20,20,400,400);x.drawImage(inner(i),120,120);return c}
+function patt(i){const s=inner(i),c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');let o='';
+ for(let r=0;r<4;r++){x.clearRect(0,0,16,16);x.save();x.translate(8,8);x.rotate(-r*Math.PI/2);x.translate(-8,-8);x.drawImage(s,0,0,16,16);x.restore();
+  const d=x.getImageData(0,0,16,16).data;
+  for(let ch=2;ch>=0;ch--)for(let y=0;y<16;y++){const l=[];for(let u=0;u<16;u++)l.push(String(d[(y*16+u)*4+ch]).padStart(3));o+=l.join(' ')+'\n'}
+  o+='\n'}
+ return URL.createObjectURL(new Blob([o],{type:'text/plain'}))}
+function openPrint(){const g=$('grid');g.innerHTML='';for(let i=0;i<6;i++){const f=document.createElement('figure');f.appendChild(markerImg(i));
+ const t=document.createElement('div');t.textContent=`Sisi ${i+1} — `+(i<4?OBJ[i].n:'Video '+(i-3));f.appendChild(t);g.appendChild(f)}show('print')}
+
+/* ---------- tekstur planet (prosedural) ---------- */
+function rnd(s){return()=>(s=s*16807%2147483647)/2147483647}
+function B(x,r,col,n,a,b,al){x.globalAlpha=al;for(let i=0;i<n;i++){x.fillStyle=col[(r()*col.length)|0];x.beginPath();x.arc(r()*512,r()*256,a+r()*(b-a),0,7);x.fill()}x.globalAlpha=1}
+function tex(id,w,h,fn){if($(id))return;const c=document.createElement('canvas');c.id=id;c.width=w;c.height=h;c.style.display='none';fn(c.getContext('2d'),rnd(11));document.body.appendChild(c)}
+function makeTex(){
+ tex('t0',512,256,(x,r)=>{x.fillStyle='#ff8a00';x.fillRect(0,0,512,256);B(x,r,['#ffd23a','#ff5a00','#fff2a0'],400,4,26,.35)});
+ tex('t1',512,256,(x,r)=>{for(let y=0;y<256;y+=8){x.fillStyle=['#c99b6d','#e8d3b0','#a9744a','#d9b68c'][(r()*4)|0];x.fillRect(0,y,512,8)}
+  B(x,r,['#8a5a36','#f1e0c4'],120,3,10,.2);x.fillStyle='#b5502d';x.beginPath();x.ellipse(340,170,34,18,0,0,7);x.fill()});
+ tex('t2',512,256,(x,r)=>{x.fillStyle='#1c5fb0';x.fillRect(0,0,512,256);B(x,r,['#3f9b4a','#6aa84f','#c9b26b'],45,12,40,1);B(x,r,['#fff'],60,6,22,.45);x.fillStyle='#fff';x.fillRect(0,0,512,12);x.fillRect(0,244,512,12)});
+ tex('t3',512,256,(x,r)=>{x.fillStyle='#c1440e';x.fillRect(0,0,512,256);B(x,r,['#8c2f0a','#e08a4a','#a63a0c'],220,5,28,.4);x.fillStyle='#fff';x.fillRect(0,0,512,8);x.fillRect(0,248,512,8)});
+ for(let k=0;k<2;k++)tex('mc'+k,512,288,x=>{x.fillStyle='#111a3a';x.fillRect(0,0,512,288);x.strokeStyle='#22d3ee';x.lineWidth=6;x.strokeRect(8,8,496,272);x.fillStyle='#fff';x.font='bold 40px sans-serif';x.textAlign='center';x.fillText('VIDEO '+(k+1),256,140);x.font='24px sans-serif';x.fillStyle='#9fb0d9';x.fillText('Belum ada media',256,185)})}
+
+/* ---------- media unggahan ---------- */
+function setMedia(k,f){if(!f)return;const old=$('m'+k);old&&old.remove();const v=f.type.startsWith('video'),e=document.createElement(v?'video':'img');
+ e.id='m'+k;e.src=URL.createObjectURL(f);if(v){e.loop=true;e.playsInline=true;e.setAttribute('playsinline','')}e.muted=true;e.style.cssText='position:fixed;left:-9999px;top:0;width:2px;height:2px;opacity:0';document.body.appendChild(e);MED[k]=e;$('st'+k).textContent='✅ '+f.name}
+
+/* ---------- AR ---------- */
+function camMsg(e){const n=(e&&e.name)||'';
+ if(n==='NotAllowedError'||n==='SecurityError')return 'Izin kamera ditolak/diblokir.\n\nCara memperbaiki: ketuk ikon gembok/pengaturan di kolom alamat browser → Izin → Kamera → Izinkan, lalu muat ulang halaman.\nJika dibuka dari dalam aplikasi lain (WhatsApp, Instagram, Telegram, pratinjau), buka link di Chrome/Safari.';
+ if(n==='NotFoundError'||n==='OverconstrainedError')return 'Kamera tidak ditemukan di perangkat ini.';
+ if(n==='NotReadableError'||n==='AbortError')return 'Kamera sedang dipakai aplikasi lain. Tutup aplikasi kamera/video call lalu coba lagi.';
+ return 'Kamera gagal dibuka ('+(n||e)+').'}
+async function start(){
+ if(!window.isSecureContext||!navigator.mediaDevices)return alert('Kamera hanya bisa dipakai lewat alamat HTTPS. Buka aplikasi dari link https:// (bukan dari file di HP).');
+ try{const ms=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});ms.getTracks().forEach(t=>t.stop())}catch(e){return alert(camMsg(e))}
+ try{navigator.wakeLock&&navigator.wakeLock.request('screen')}catch(e){}
+ makeTex();show('none');$('hud').classList.add('on');document.body.classList.add('ar');found.clear();score();setCard(-1);
+ const u=P.map((_,i)=>patt(i));let m='';
+ OBJ.forEach((o,i)=>m+=`<a-marker type="pattern" url="${u[i]}" data-i="${i}"><a-sphere radius="0.5" position="0 0.6 0" material="src:#t${i};shader:flat" animation="property:rotation;to:0 360 0;loop:true;dur:14000;easing:linear"></a-sphere></a-marker>`);
+ for(let k=0;k<2;k++)m+=`<a-marker type="pattern" url="${u[4+k]}" data-i="${4+k}"><a-plane id="pl${k}" rotation="-90 0 0" width="1.8" height="1.01" position="0 0.01 0" material="src:#${MED[k]?'m':'mc'}${k};shader:flat;side:double"></a-plane></a-marker>`;
+ $('stage').innerHTML=`<a-scene embedded vr-mode-ui="enabled:false" renderer="alpha:true;logarithmicDepthBuffer:true" arjs="trackingMethod:best;sourceType:webcam;debugUIEnabled:false;detectionMode:mono;patternRatio:0.5">${m}<a-entity camera></a-entity></a-scene>`;
+ $('stage').firstChild.addEventListener('camera-error',()=>{stop();alert(camMsg({name:'NotAllowedError'}))});
+ document.querySelectorAll('a-marker').forEach(mk=>{const i=+mk.dataset.i;mk.addEventListener('markerFound',()=>onF(i));mk.addEventListener('markerLost',()=>onL(i))})}
+function stop(){const v=$('arjs-video');v&&v.srcObject&&v.srcObject.getTracks().forEach(t=>t.stop());v&&v.remove();$('stage').innerHTML='';
+ $('hud').classList.remove('on');document.body.classList.remove('ar');MED.forEach(e=>e&&e.pause&&e.pause());show('menu')}
+let AC;function beep(){try{AC=AC||new AudioContext();const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.frequency.value=880;g.gain.value=.08;o.start();o.stop(AC.currentTime+.12)}catch(e){}}
+function score(){$('score').textContent=`Skor: ${found.size}/4`}
+function setCard(i){const t=$('ct'),p=$('cp'),a=$('ca');a.innerHTML='';
+ if(i<0){t.textContent='Halakan pada satu muka kubus';p.textContent='Pastikan marker rata, terang dan memenuhi bingkai.';return}
+ if(i<4){t.textContent=OBJ[i].e+' '+OBJ[i].n;p.textContent=OBJ[i].f;return}
+ const k=i-4;t.textContent='Video '+(k+1);
+ if(MED[k]){p.textContent='Target dikenali. Media sedang ditampilkan.';if(MED[k].tagName==='VIDEO'){a.innerHTML='<button class="btn y" id="rp">🔁 Ulang</button><button class="btn" id="sn">'+(MED[k].muted?'🔇 Suara mati':'🔊 Suara hidup')+'</button>';$('rp').onclick=()=>{MED[k].currentTime=0;MED[k].play()};$('sn').onclick=()=>{MED[k].muted=!MED[k].muted;$('sn').textContent=MED[k].muted?'🔇 Suara mati':'🔊 Suara hidup';MED[k].play()}}}
+ else p.textContent='Belum ada media. Keluar lalu pilih "Atur Video / Gambar" di menu.'}
+function onF(i){beep();$('frame').style.display='none';$('stat').textContent='Target '+(i+1)+' ditemukan';$('stat').classList.add('ok');setCard(i);
+ if(i<4){const n=found.size;found.add(i);score();if(n===3&&found.size===4)toast('🎉 Misi selesai! Semua objek ditemukan')}
+ else{const k=i-4,e=MED[k];if(e){const w=e.videoWidth||e.naturalWidth,h=e.videoHeight||e.naturalHeight;if(w)$('pl'+k).setAttribute('height',1.8*h/w);e.tagName==='VIDEO'&&e.play()}}}
+function onL(i){$('stat').textContent='Mencari target…';$('stat').classList.remove('ok');$('frame').style.display='';setCard(-1);if(i>=4&&MED[i-4]&&MED[i-4].pause)MED[i-4].pause()}
+function toast(s,bad){const t=$('toast');t.style.background=bad?'#dc2626':'#16a34a';t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',4500)}
+</script>
+</body></html>
